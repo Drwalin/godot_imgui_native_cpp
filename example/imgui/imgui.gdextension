@@ -1,0 +1,13 @@
+[configuration]
+entry_symbol = "imgui_library_init"
+compatibility_minimum = "4.2.1"
+
+[libraries]
+linux.debug.x86_64 = "res://bin/libgodot_imgui_native.so"
+linux.release.x86_64 = "res://bin/libgodot_imgui_native.so"
+linux.x86_64.debug = "res://bin/libgodot_imgui_native.so"
+linux.x86_64.release = "res://bin/libgodot_imgui_native.so"
+windows.debug.x86_64 = "res://bin/libgodot_imgui_native.dll"
+windows.release.x86_64 = "res://bin/libgodot_imgui_native.dll"
+windows.x86_64.debug = "res://bin/libgodot_imgui_native.dll"
+windows.x86_64.release = "res://bin/libgodot_imgui_native.dll"
