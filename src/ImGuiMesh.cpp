@@ -4,6 +4,7 @@
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/text_server.hpp>
+#include <godot_cpp/classes/engine.hpp>
 
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/input_event_screen_touch.hpp>
@@ -21,39 +22,68 @@
 #include "godot_cpp/classes/base_material3d.hpp"
 #include "godot_cpp/classes/immediate_mesh.hpp"
 
+GodotImGuiMesh::GodotImGuiMesh()
+{
+	UtilityFunctions::print("GodotImGuiMesh::GodotImGuiMesh()");
+}
+
+GodotImGuiMesh::~GodotImGuiMesh()
+{
+	UtilityFunctions::print("GodotImGuiMesh::~GodotImGuiMesh()");
+}
+
 void GodotImGuiMesh::_bind_methods() {}
 
 void GodotImGuiMesh::_enter_tree()
 {
-	mesh = godot::Ref<godot::ImmediateMesh>(new godot::ImmediateMesh());
+	if (Engine::get_singleton()->is_editor_hint()) {
+		return;
+	}
+	UtilityFunctions::print("GodotImGuiMesh::_enter_tree()");
+	mesh.instantiate();
 	set_mesh(mesh);
 	mesh->clear_surfaces();
-	shader = godot::ResourceLoader::get_singleton()->load(
-		"res://imgui/gui_shader.gdshader", "ShaderMaterial");
+	shader = ResourceLoader::get_singleton()->load(
+		"res://imgui/gui_shader.gdshader");
 }
 
-void GodotImGuiMesh::_exit_tree() {}
+void GodotImGuiMesh::_exit_tree() {
+	if (Engine::get_singleton()->is_editor_hint()) {
+		return;
+	}
+	
+	UtilityFunctions::print("GodotImGuiMesh::_exit_tree()");
+}
 
-void GodotImGuiMesh::_ready() { this->set_process_priority(0x7FFFFFFF); }
+void GodotImGuiMesh::_ready()
+{
+	if (Engine::get_singleton()->is_editor_hint()) {
+		return;
+	}
+	this->set_process_priority(0x7F);
+	UtilityFunctions::print("GodotImGuiMesh::_ready()");
+}
 
 void GodotImGuiMesh::_process(double_t delta)
 {
+	if (Engine::get_singleton()->is_editor_hint()) {
+		return;
+	}
 	godotImgui->ImGui_Impl_EndFrame();
 }
 
-godot::Ref<godot::ShaderMaterial>
-GodotImGuiMesh::GetNewMaterial(godot::Texture2D *texturePtr)
+Ref<ShaderMaterial> GodotImGuiMesh::GetNewMaterial(Texture2D *texturePtr)
 {
 	if (materials.size() <= freeMaterialId) {
 		materials.resize(freeMaterialId + 1);
 	}
 
-	godot::Ref<godot::ShaderMaterial> &mat = materials[freeMaterialId];
+	Ref<ShaderMaterial> &mat = materials[freeMaterialId];
 
 	if (mat.is_null()) {
 		mat.instantiate();
 		mat->set_shader(shader);
-		mat->set_shader_parameter("TEXTURE", godot::Ref(texturePtr));
+		mat->set_shader_parameter("TEXTURE", Ref(texturePtr));
 	}
 
 	return mat;
@@ -70,6 +100,11 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 
 	// TODO: set ortographic projection matrix here if necssary
 
+	int verticesCount = 0;
+	int indicesCount = 0;
+	int drawcmdCount = 0;
+	
+	
 	for (int n = 0; n < draw_data->CmdListsCount; n++) {
 		const ImDrawList *cmd_list = draw_data->CmdLists[n];
 
@@ -77,6 +112,9 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 		auto idxBuf = cmd_list->IdxBuffer;
 		auto vtxBuf = cmd_list->VtxBuffer;
 		// 		auto flags = cmd_list->Flags;
+		
+	verticesCount += vtxBuf.size();
+	drawcmdCount += cmdBuf.size();
 
 		ImVec2 clip_off = draw_data->DisplayPos;
 		for (int cmd_i = 0; cmd_i < cmdBuf.Size; cmd_i++) {
@@ -98,17 +136,19 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 					continue;
 
 				auto mat =
-					GetNewMaterial((godot::Texture2D *)(pcmd->GetTexID()));
+					GetNewMaterial((Texture2D *)(pcmd->GetTexID()));
 				mesh->surface_begin(
-					godot::Mesh::PrimitiveType::PRIMITIVE_TRIANGLES, mat);
-				godot::Vector4 clip{clip_min.x, clip_min.y, clip_max.x,
+					Mesh::PrimitiveType::PRIMITIVE_TRIANGLES, mat);
+				Vector4 clip{clip_min.x, clip_min.y, clip_max.x,
 									clip_max.y};
 				mat->set_shader_parameter("scissor_test", clip);
+				
+	indicesCount += pcmd->ElemCount;
 
 				for (int i = pcmd->IdxOffset;
 					 i < pcmd->IdxOffset + pcmd->ElemCount; ++i) {
 					auto &v = vtxBuf[idxBuf[i]];
-					mesh->surface_set_color(godot::Color::hex(v.col));
+					mesh->surface_set_color(Color::hex(v.col));
 					mesh->surface_set_uv({v.uv.x, v.uv.y});
 					mesh->surface_add_vertex_2d({v.pos.x, v.pos.y});
 				}
@@ -116,4 +156,9 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 			}
 		}
 	}
+	
+	UtilityFunctions::print("cmdListCount: ", draw_data->CmdListsCount,
+			",   drawcmdCount: ", drawcmdCount,
+			",   indicesCount: ", indicesCount,
+			",   verticesCount: ", verticesCount);
 }

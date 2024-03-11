@@ -15,9 +15,11 @@ void register_gameplay_types(godot::ModuleInitializationLevel p_level)
 		godot::ModuleInitializationLevel::MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
+	
+	Register_ImGui_class();
 
-// 	godot::ClassDB::register_class<GodotImGuiMesh>();
-// 	godot::ClassDB::register_class<GodotImGui>();
+	godot::ClassDB::register_class<GodotImGuiMesh>();
+	godot::ClassDB::register_class<GodotImGui>();
 	// REGISTER CLASSES HERE LATER
 }
 

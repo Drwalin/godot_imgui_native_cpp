@@ -17,7 +17,9 @@
 
 #include "ImGuiMesh.hpp"
 
-class GodotImGui : public godot::Node
+using namespace godot;
+
+class GodotImGui : public Node
 {
 	GDCLASS(GodotImGui, Node)
 public:
@@ -29,10 +31,10 @@ public:
 	void _ready() override;
 	void _process(double_t delta) override;
 	void _notification(int what);
-	virtual void _input(const godot::Ref<godot::InputEvent> &event) override;
-	virtual void _shortcut_input(const godot::Ref<godot::InputEvent> &event) override;
-	virtual void _unhandled_input(const godot::Ref<godot::InputEvent> &event) override;
-	virtual void _unhandled_key_input(const godot::Ref<godot::InputEvent> &event) override;
+	virtual void _input(const Ref<InputEvent> &event) override;
+	virtual void _shortcut_input(const Ref<InputEvent> &event) override;
+	virtual void _unhandled_input(const Ref<InputEvent> &event) override;
+	virtual void _unhandled_key_input(const Ref<InputEvent> &event) override;
 	
 	void DisableInput();
 	void EnableInput();
@@ -43,18 +45,22 @@ public: // Dear ImGui
 	void ImGui_Impl_Shutdown();
 	void ImGui_Impl_NewFrame();
 	void ImGui_Impl_RenderDrawData(ImDrawData* draw_data);
-	void ImGui_Impl_ProcessEvent(godot::InputEvent *event);
+	void ImGui_Impl_ProcessEvent(InputEvent *event);
 
 	// Use if you want to reset your rendering device without losing Dear ImGui state.
-	bool ImGui_Impl_CreateDeviceObjects();
-	void ImGui_Impl_InvalidateDeviceObjects();
+	void ImGui_Impl_InitFonts();
 	
 	void ImGui_Impl_BeginFrame();
 	void ImGui_Impl_EndFrame();
 	
 	void ImGui_Impl_UpdateMouseCursor();
 	
+public: // ImGui bindings
+	static void Bind_ImGui();
+	static void Bind_EnumConstants();
+	
 private:
+	Ref<Texture2D> fontTexture;
 	
 	bool hasFrameBegun = false;
 	

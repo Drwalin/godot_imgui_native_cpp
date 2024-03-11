@@ -7,3 +7,5 @@
 
 void register_gameplay_types(godot::ModuleInitializationLevel p_level);
 void unregister_gameplay_types(godot::ModuleInitializationLevel p_level);
+
+void Register_ImGui_class();

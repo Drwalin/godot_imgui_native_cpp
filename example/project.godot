@@ -11,9 +11,8 @@ config_version=5
 [application]
 
 config/name="TestGdExtension"
+run/main_scene="res://scene.tscn"
 config/features=PackedStringArray("4.2", "Mobile")
-
-[autoload]
 
 [rendering]
 
