@@ -21,12 +21,16 @@
 
 #include "../../imgui/imgui.h"
 
+using namespace godot;
+
 class GodotImGui;
 
-class GodotImGuiMesh : public godot::MeshInstance2D
+class GodotImGuiMesh : public MeshInstance2D
 {
 	GDCLASS(GodotImGuiMesh, MeshInstance2D)
 public:
+	GodotImGuiMesh();
+	~GodotImGuiMesh();
 	static void _bind_methods();
 	
 	void _ready() override;
@@ -36,18 +40,18 @@ public:
 	
 	void ImGui_Impl_RenderDrawData(ImDrawData *drawData);
 	
-	godot::Ref<godot::ShaderMaterial> GetNewMaterial(godot::Texture2D *texturePtr);
+	Ref<ShaderMaterial> GetNewMaterial(Texture2D *texturePtr);
 	
 public:
 	
 public:
 	
-	godot::Ref<godot::ShaderMaterial> shader;
+	Ref<ShaderMaterial> shader;
 	
 	GodotImGui *godotImgui = nullptr;
-	godot::Ref<godot::ImmediateMesh> mesh;
+	Ref<ImmediateMesh> mesh;
 	
-	std::vector<godot::Ref<godot::ShaderMaterial>> materials;
+	std::vector<Ref<ShaderMaterial>> materials;
 	int freeMaterialId = 0;
 };
 #endif
