@@ -29,37 +29,37 @@ void GodotImGui::_process(double_t dt)
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
+	
+	ImGui::PushFont(LoadFont("res://dvu_sans_mono.ttf", 16));
+	
+	ImGui_Impl_BeginFrame();
+	ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, {0, 72.0/255.0, 174.0/255.0, 1});
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
+	
+	
+	ImGui::Begin("Test");
+	
+	static float v[4];
+	float v2[4];
+	memcpy(v2, v, 16);
+	ImGui::InputFloat4("floats", v2);
+	memcpy(v, v2, 16);
+	
+	char str[100000] = "fdhjkfjdkslfjdkl;safj;dsfk;ds\ndkhjfldjskfljdksafjdklfjklasdff\nhdjfklhdjklafhdjlfjksa\ndjkfshdjklafhdslahdas\ndjksfsdfhdjskaflsdhjaklfdashf\nfdjkslafhjdkaslfhjksdlafsda\nfdjsafkjdhasfjkldhsaljfhdasf\ndjksafjdasko fdasjfhasf\ndjksapo fhasdjk fhjdjksf ajksp fhas\nfdjkps oafhjdspa fhdjkasf h\n hdfjsakfphdasjpofhdas f\nhfdjas klfhdjskal fhsd";
+	
+// 	ImGui::InputText("label1", str, sizeof(str));
+	
+	ImGui::InputTextMultiline("lab", str, sizeof(str), {0,0},
+			ImGuiInputTextFlags_AllowTabInput);
+	
+	
+//     InputTextMultiline(const char* label, char* buf, size_t buf_size, const ImVec2& size = ImVec2(0, 0), ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
+	ImGui::PopStyleColor(2);
+	ImGui::End();
+	ImGui::PopFont();
 }
-
 
 void GodotImGui::_input(const Ref<InputEvent> &event)
-{
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
-	
-	ImGui_Impl_ProcessEvent(event.ptr());
-}
-
-void GodotImGui::_shortcut_input(const Ref<InputEvent> &event)
-{
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
-	
-	ImGui_Impl_ProcessEvent(event.ptr());
-}
-
-void GodotImGui::_unhandled_input(const Ref<InputEvent> &event)
-{
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
-	
-	ImGui_Impl_ProcessEvent(event.ptr());
-}
-
-void GodotImGui::_unhandled_key_input(const Ref<InputEvent> &event)
 {
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
@@ -117,17 +117,20 @@ void GodotImGui::ImGui_Impl_ProcessEvent(InputEvent *event)
 						// TODO: how to handle these other mouse buttons?
 				}
 			} else if (auto e = Object::cast_to<InputEventKey>(event)) {
+				if (e->is_alt_pressed() == false) {
+					if (ImGui::IsKeyDown(ImGuiKey_ModAlt)) {
+						io.AddKeyEvent(ImGuiKey_ModAlt, false);
+					}
+				}
 				auto imguiKeyCode = GodotToImGuiKeyCode(e->get_keycode());
 				io.AddKeyEvent(imguiKeyCode, e->is_pressed());
-                io.AddInputCharacter((unsigned int)e->get_unicode());
+				if (e->get_unicode() != 0) {
+					io.AddInputCharacter((unsigned int)e->get_unicode());
+				}
 // 				io.SetKeyEventNativeData(imguiKeyCode, e->get_keycode(), e->get_physical_keycode()); // To support legacy indexing (<1.87 user code)
 			}
         }
 	}
-//     case ALLEGRO_EVENT_MOUSE_LEAVE_DISPLAY:
-//         if (ev->mouse.display == bd->Display)
-//             io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
-//         return true;
 }
 
 ImGuiKey GodotToImGuiKeyCode(int keycode)
@@ -181,9 +184,12 @@ ImGuiKey GodotToImGuiKeyCode(int keycode)
 		case Key::KEY_KP_SUBTRACT: return ImGuiKey_KeypadSubtract;
 		case Key::KEY_KP_ADD: return ImGuiKey_KeypadAdd;
 		case Key::KEY_KP_ENTER: return ImGuiKey_KeypadEnter;
-		case Key::KEY_CTRL: return ImGuiKey_LeftCtrl;
-		case Key::KEY_SHIFT: return ImGuiKey_LeftShift;
-		case Key::KEY_ALT: return ImGuiKey_LeftAlt;
+		case Key::KEY_CTRL: return ImGuiKey_ModCtrl;
+		case Key::KEY_SHIFT: return ImGuiKey_ModShift;
+		case Key::KEY_ALT: return ImGuiKey_ModAlt;
+// 		case Key::KEY_CTRL: return ImGuiKey_LeftCtrl;
+// 		case Key::KEY_SHIFT: return ImGuiKey_LeftShift;
+// 		case Key::KEY_ALT: return ImGuiKey_LeftAlt;
 // 		case Key::KEY_LWIN: return ImGuiKey_LeftSuper;
 // 		case Key::KEY_RCTRL: return ImGuiKey_RightCtrl;
 // 		case Key::KEY_RSHIFT: return ImGuiKey_RightShift;

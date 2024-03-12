@@ -201,6 +201,15 @@ void GodotImGui::ImGui_Impl_Init()
 	ImGui::StyleColorsClassic();
 	
 	ImGui_Impl_InitFonts();
+	
+	io.GetClipboardTextFn = +[](void*ptr)->const char *{
+		static std::string content;
+		content = DisplayServer::get_singleton()->clipboard_get().utf8().ptr();
+		return content.c_str();
+	};
+	io.SetClipboardTextFn = +[](void*ptr, const char*str)->void{
+		DisplayServer::get_singleton()->clipboard_set(String::utf8(str));
+	};
 }
 
 void GodotImGui::ImGui_Impl_InitFonts()
@@ -243,7 +252,25 @@ ImFont *GodotImGui::LoadFont(const struct FontSizePair &info)
 	}
 	
     ImGuiIO& io = ImGui::GetIO();
-	ImFont *font = io.Fonts->AddFontFromMemoryTTF((void *)bytes.ptr(), bytes.size(), info.size);
+	auto f = io.Fonts;
+	
+	ImFontGlyphRangesBuilder glyphs;
+	glyphs.AddText("ęóąśłżźćńĘÓĄŚŁŻŹĆŃ„”µðđŋħˀĸþ→€←ŧ¶ſ@Ω§®Ŧ¥¢ıÓÞĄŚÐªŊĦ ̛&ŁŻŹĆ‘“Ńº•· ̣´^¨~`×÷ ̇˝ˇ˚¯˘¬¹²³¼½¾{[]}¸˛¿°±™⅞⅝⅜$£⅛¡");
+	glyphs.AddRanges(f->GetGlyphRangesDefault());
+    glyphs.AddRanges(f->GetGlyphRangesDefault());
+    glyphs.AddRanges(f->GetGlyphRangesGreek());
+    glyphs.AddRanges(f->GetGlyphRangesKorean());
+    glyphs.AddRanges(f->GetGlyphRangesJapanese());
+    glyphs.AddRanges(f->GetGlyphRangesChineseFull());
+    glyphs.AddRanges(f->GetGlyphRangesChineseSimplifiedCommon());
+    glyphs.AddRanges(f->GetGlyphRangesCyrillic());
+    glyphs.AddRanges(f->GetGlyphRangesThai());
+    glyphs.AddRanges(f->GetGlyphRangesVietnamese());
+	
+	ImVector<ImWchar> r;
+	glyphs.BuildRanges(&r);
+	
+	ImFont *font = io.Fonts->AddFontFromMemoryTTF((void *)bytes.ptr(), bytes.size(), info.size, nullptr, r.begin());
 	if (font) {
 		rebuildFonts = true;
 		ImGuiIO& io = ImGui::GetIO();

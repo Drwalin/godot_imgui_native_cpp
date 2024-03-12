@@ -33,9 +33,6 @@ public:
 	void _process(double_t dt) override;
 	void _notification(int what);
 	virtual void _input(const Ref<InputEvent> &event) override;
-	virtual void _shortcut_input(const Ref<InputEvent> &event) override;
-	virtual void _unhandled_input(const Ref<InputEvent> &event) override;
-	virtual void _unhandled_key_input(const Ref<InputEvent> &event) override;
 	
 	void DisableInput();
 	void EnableInput();
