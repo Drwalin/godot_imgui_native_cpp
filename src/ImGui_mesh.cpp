@@ -63,7 +63,11 @@ void GodotImGui::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 		for (int i=0; i<vtxBuf.size(); ++i) {
 			auto &v = vtxBuf[i];
 			vertices[i] = {v.pos.x, v.pos.y};
-			colors[i] = Color::hex(v.col);
+			colors[i] = {
+				((v.col>> 0)&0xFF)/255.0f,
+				((v.col>> 8)&0xFF)/255.0f,
+				((v.col>>16)&0xFF)/255.0f,
+				((v.col>>24)&0xFF)/255.0f};
 			uvs[i] = {v.uv.x, v.uv.y};
 		}
 
@@ -106,4 +110,7 @@ void GodotImGui::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 			}
 		}
 	}
+	
+// 	rs->canvas_item_clear(get_canvas_item());
+// 	fontTexture->draw(get_canvas_item(), {0,0});
 }

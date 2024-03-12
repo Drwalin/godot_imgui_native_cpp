@@ -397,9 +397,22 @@ void GodotImGui::Bind_ImGui()
 	// TODO: Finish Combo
 	
 	
+	
+	
+	// TODO: Input with keyboard
+    IMGUI_API bool          InputText(const char* label, char* buf, size_t buf_size, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
+    IMGUI_API bool          InputTextMultiline(const char* label, char* buf, size_t buf_size, const ImVec2& size = ImVec2(0, 0), ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
+	
+	
+	
+	
+	// TODO: ID stack/scopes
+	// TODO: Window scrolling
+	// TODO: Parameters stack(current window)
+	// TODO: Style read access
+	
 	// TODO: Drag Sliders
 	// TODO: Regular Sliders
-	// TODO: Input with keyboard
 	// TODO: Color Picker
 	// TODO: Trees
 	// TODO: List Box
