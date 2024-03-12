@@ -374,8 +374,11 @@ void GodotImGui::ImGui_Impl_UpdateMouseCursor()
     ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
     if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None)
     {
-		Input::get_singleton()->set_mouse_mode(Input::MouseMode::MOUSE_MODE_HIDDEN);
-		UtilityFunctions::print("Hide os cursor here!");
+// 		if (io.MouseDrawCursor == false) {
+// 			Input::get_singleton()->set_mouse_mode(Input::MouseMode::MOUSE_MODE_VISIBLE);
+// 		} else {
+// 			Input::get_singleton()->set_mouse_mode(Input::MouseMode::MOUSE_MODE_HIDDEN);
+// 		}
         // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
 //         al_set_mouse_cursor(bd->Display, bd->MouseCursorInvisible);
     }
@@ -404,7 +407,6 @@ void GodotImGui::ImGui_Impl_Init()
 	io.BackendPlatformUserData = this;
 // 	ImGui::StyleColorsDark();
 	ImGui::StyleColorsClassic();
-	io.MouseDrawCursor = true;
 	
 	// TODO: init godot imgui here
 	ImGui_Impl_InitFonts();
