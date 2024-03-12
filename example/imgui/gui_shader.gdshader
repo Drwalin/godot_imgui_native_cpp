@@ -4,23 +4,16 @@ render_mode unshaded;
 uniform vec4 scissor_test;
 
 void vertex() {
-	//VERTEX = (SCREEN_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy;
+//	VERTEX = VERTEX;//(SCREEN_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy;
 }
 
 void fragment() {
-	if (POINT_COORD.x < scissor_test.x || POINT_COORD.x > scissor_test.z ||
-		POINT_COORD.y < scissor_test.y || POINT_COORD.y > scissor_test.w) {
+	if (FRAGCOORD.x < scissor_test.x || FRAGCOORD.x > scissor_test.z ||
+		FRAGCOORD.y < scissor_test.y || FRAGCOORD.y > scissor_test.w) {
 		discard;
+		COLOR = COLOR*texture(TEXTURE, UV);
+		COLOR.x = 0.5;
 	} else {
-		COLOR = vec4(1,0.2,0.2,0.7);
-	//COLOR = texture(TEXTURE, UV);
-	//COLOR.xy = POINT_COORD.xy;
-	//COLOR.w = 1.0;
-		
-		//if (has_texture) {
-		//	COLOR *= texture(TEXTURE, UV);
-		//} else {
-			// COLOR = COLOR;
-		//}
+		COLOR = COLOR*texture(TEXTURE, UV);
 	}
 }

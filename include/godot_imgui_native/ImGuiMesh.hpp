@@ -21,6 +21,8 @@
 #include <godot_cpp/classes/node2d.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/classes/canvas_item_material.hpp>
+#include <godot_cpp/classes/shader_material.hpp>
+#include <godot_cpp/classes/control.hpp>
 
 #include "../../imgui/imgui.h"
 
@@ -43,9 +45,15 @@ public:
 	
 	void ImGui_Impl_RenderDrawData(ImDrawData *drawData);
 	
+	Control *GetNextChild();
+	void ClearChildren();
+	
 public:
 	
 public:
+	Ref<Shader> shader;
+	Ref<ShaderMaterial> material;
+	
 	PackedInt32Array indices;
 	PackedVector2Array vertices;
 	PackedColorArray colors;
@@ -53,8 +61,7 @@ public:
 	
 	GodotImGui *godotImgui = nullptr;
 	
-	Ref<CanvasItemMaterial> mat;
-	int freeMaterialId = 0;
+	int nextFreeChild = 0;
 };
 #endif
 
