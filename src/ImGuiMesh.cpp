@@ -24,12 +24,10 @@
 
 GodotImGuiMesh::GodotImGuiMesh()
 {
-	UtilityFunctions::print("GodotImGuiMesh::GodotImGuiMesh()");
 }
 
 GodotImGuiMesh::~GodotImGuiMesh()
 {
-	UtilityFunctions::print("GodotImGuiMesh::~GodotImGuiMesh()");
 }
 
 void GodotImGuiMesh::_bind_methods() {}
@@ -39,20 +37,18 @@ void GodotImGuiMesh::_enter_tree()
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-	UtilityFunctions::print("GodotImGuiMesh::_enter_tree()");
-	mesh.instantiate();
-	set_mesh(mesh);
-	mesh->clear_surfaces();
-	shader = ResourceLoader::get_singleton()->load(
-		"res://imgui/gui_shader.gdshader");
+// 	shader = ResourceLoader::get_singleton()->load("res://imgui/gui_shader.gdshader");
+	
+// 	mat.instantiate();
+	this->set_texture_filter(TEXTURE_FILTER_LINEAR);
+	this->set_texture_repeat(TEXTURE_REPEAT_ENABLED);
+	this->set_light_mask(0);
 }
 
 void GodotImGuiMesh::_exit_tree() {
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-	
-	UtilityFunctions::print("GodotImGuiMesh::_exit_tree()");
 }
 
 void GodotImGuiMesh::_ready()
@@ -60,8 +56,6 @@ void GodotImGuiMesh::_ready()
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-	this->set_process_priority(0x7F);
-	UtilityFunctions::print("GodotImGuiMesh::_ready()");
 }
 
 void GodotImGuiMesh::_process(double_t delta)
@@ -69,24 +63,7 @@ void GodotImGuiMesh::_process(double_t delta)
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-	godotImgui->ImGui_Impl_EndFrame();
-}
-
-Ref<ShaderMaterial> GodotImGuiMesh::GetNewMaterial(Texture2D *texturePtr)
-{
-	if (materials.size() <= freeMaterialId) {
-		materials.resize(freeMaterialId + 1);
-	}
-
-	Ref<ShaderMaterial> &mat = materials[freeMaterialId];
-
-	if (mat.is_null()) {
-		mat.instantiate();
-		mat->set_shader(shader);
-		mat->set_shader_parameter("TEXTURE", Ref(texturePtr));
-	}
-
-	return mat;
+// 	godotImgui->ImGui_Impl_EndFrame();
 }
 
 void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
@@ -94,16 +71,16 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 	// Avoid rendering when minimized
 	if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
 		return;
+	
+	auto rs = RenderingServer::get_singleton();
 
-	mesh->clear_surfaces();
 	freeMaterialId = 0;
 
 	// TODO: set ortographic projection matrix here if necssary
 
-	int verticesCount = 0;
-	int indicesCount = 0;
-	int drawcmdCount = 0;
+	RID selfRid = this->get_canvas_item();
 	
+	rs->canvas_item_clear(selfRid);
 	
 	for (int n = 0; n < draw_data->CmdListsCount; n++) {
 		const ImDrawList *cmd_list = draw_data->CmdLists[n];
@@ -111,10 +88,22 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 		auto cmdBuf = cmd_list->CmdBuffer;
 		auto idxBuf = cmd_list->IdxBuffer;
 		auto vtxBuf = cmd_list->VtxBuffer;
-		// 		auto flags = cmd_list->Flags;
 		
-	verticesCount += vtxBuf.size();
-	drawcmdCount += cmdBuf.size();
+		indices.resize(idxBuf.size());
+		vertices.resize(vtxBuf.size());
+		colors.resize(vtxBuf.size());
+		uvs.resize(vtxBuf.size());
+		
+		for (int i=0; i<idxBuf.size(); ++i) {
+			indices[i] = idxBuf[i];
+		}
+		
+		for (int i=0; i<vtxBuf.size(); ++i) {
+			auto &v = vtxBuf[i];
+			vertices[i] = {v.pos.x, v.pos.y};
+			colors[i] = Color::hex(v.col);
+			uvs[i] = {v.uv.x, v.uv.y};
+		}
 
 		ImVec2 clip_off = draw_data->DisplayPos;
 		for (int cmd_i = 0; cmd_i < cmdBuf.Size; cmd_i++) {
@@ -134,31 +123,23 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 								pcmd->ClipRect.w - clip_off.y);
 				if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
 					continue;
-
-				auto mat =
-					GetNewMaterial((Texture2D *)(pcmd->GetTexID()));
-				mesh->surface_begin(
-					Mesh::PrimitiveType::PRIMITIVE_TRIANGLES, mat);
-				Vector4 clip{clip_min.x, clip_min.y, clip_max.x,
-									clip_max.y};
-				mat->set_shader_parameter("scissor_test", clip);
 				
-	indicesCount += pcmd->ElemCount;
-
-				for (int i = pcmd->IdxOffset;
-					 i < pcmd->IdxOffset + pcmd->ElemCount; ++i) {
-					auto &v = vtxBuf[idxBuf[i]];
-					mesh->surface_set_color(Color::hex(v.col));
-					mesh->surface_set_uv({v.uv.x, v.uv.y});
-					mesh->surface_add_vertex_2d({v.pos.x, v.pos.y});
+// 				mat->set_shader_parameter("scissor_test", clip);
+				
+				auto indicesSlice = indices.slice(pcmd->IdxOffset, pcmd->IdxOffset + pcmd->ElemCount);
+				
+				RID texRid;
+				Texture2D *tex = (Texture2D *)(pcmd->GetTexID());
+				if (tex) {
+					texRid = tex->get_rid();
+					rs->canvas_item_add_texture_rect(selfRid, {0,0,tex->get_size().x/3,tex->get_size().y/3}, texRid, false, {1,1,1,1});
+					tex->draw(selfRid, {100, 100}, {1,0.2,0.2,1});
 				}
-				mesh->surface_end();
+				
+				rs->canvas_item_add_triangle_array(selfRid, indicesSlice, vertices, colors, uvs, {}, {}, texRid);
+				
 			}
 		}
 	}
 	
-	UtilityFunctions::print("cmdListCount: ", draw_data->CmdListsCount,
-			",   drawcmdCount: ", drawcmdCount,
-			",   indicesCount: ", indicesCount,
-			",   verticesCount: ", verticesCount);
 }

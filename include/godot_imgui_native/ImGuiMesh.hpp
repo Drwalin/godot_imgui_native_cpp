@@ -17,7 +17,10 @@
 #include <godot_cpp/classes/mesh_instance2d.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
 #include <godot_cpp/classes/canvas_item_material.hpp>
+#include <godot_cpp/classes/canvas_item.hpp>
+#include <godot_cpp/classes/node2d.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
+#include <godot_cpp/classes/canvas_item_material.hpp>
 
 #include "../../imgui/imgui.h"
 
@@ -25,9 +28,9 @@ using namespace godot;
 
 class GodotImGui;
 
-class GodotImGuiMesh : public MeshInstance2D
+class GodotImGuiMesh : public Node2D
 {
-	GDCLASS(GodotImGuiMesh, MeshInstance2D)
+	GDCLASS(GodotImGuiMesh, Node2D)
 public:
 	GodotImGuiMesh();
 	~GodotImGuiMesh();
@@ -40,18 +43,17 @@ public:
 	
 	void ImGui_Impl_RenderDrawData(ImDrawData *drawData);
 	
-	Ref<ShaderMaterial> GetNewMaterial(Texture2D *texturePtr);
-	
 public:
 	
 public:
-	
-	Ref<ShaderMaterial> shader;
+	PackedInt32Array indices;
+	PackedVector2Array vertices;
+	PackedColorArray colors;
+	PackedVector2Array uvs;
 	
 	GodotImGui *godotImgui = nullptr;
-	Ref<ImmediateMesh> mesh;
 	
-	std::vector<Ref<ShaderMaterial>> materials;
+	Ref<CanvasItemMaterial> mat;
 	int freeMaterialId = 0;
 };
 #endif

@@ -40,6 +40,8 @@ public:
 	void EnableInput();
 	bool IsInputEnabled();
 	
+	Texture2D *GetFontTexture();
+	
 public: // Dear ImGui
 	void ImGui_Impl_Init();
 	void ImGui_Impl_Shutdown();
