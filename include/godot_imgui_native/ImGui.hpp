@@ -85,6 +85,9 @@ private:
 	
 	std::unordered_map<std::string, ImFont *> fontsCache;
 	std::vector<FontSizePair> fontsToLoad;
+	bool rebuildFonts = true;
+	
+	std::string forceLoadSettings;
 	
 private:
 	

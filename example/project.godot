@@ -13,7 +13,7 @@ config_version=5
 config/name="TestGdExtension"
 run/main_scene="res://scene.tscn"
 config/features=PackedStringArray("4.2", "Mobile")
-run/max_fps=1000
+run/max_fps=60
 run/delta_smoothing=false
 
 [display]

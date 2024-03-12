@@ -53,9 +53,6 @@ void GodotImGui::_enter_tree()
 		return;
 	}
 	
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
 	shader = ResourceLoader::get_singleton()->load("res://imgui/gui_shader.gdshader");
 	
 	material.instantiate();
@@ -134,6 +131,15 @@ void GodotImGui::ImGui_Impl_BeginFrame()
 		}
 		fontsToLoad.clear();
 		
+		if (forceLoadSettings.empty() == false) {
+    		ImGui::LoadIniSettingsFromMemory(forceLoadSettings.c_str(), forceLoadSettings.size());
+			forceLoadSettings.clear();
+		}
+		
+		if (rebuildFonts) {
+			ImGui_Impl_InitFonts();
+		}
+		
 		hasFrameBegun = true;
 		ImGui_Impl_NewFrame();
 		ImGui::NewFrame();
@@ -199,6 +205,9 @@ void GodotImGui::ImGui_Impl_Init()
 
 void GodotImGui::ImGui_Impl_InitFonts()
 {
+	UtilityFunctions::print("Rebuilding fonts");
+	rebuildFonts = false;
+	
     ImGuiIO& io = ImGui::GetIO();
     unsigned char* pixels;
     int width, height;
@@ -236,7 +245,11 @@ ImFont *GodotImGui::LoadFont(const struct FontSizePair &info)
     ImGuiIO& io = ImGui::GetIO();
 	ImFont *font = io.Fonts->AddFontFromMemoryTTF((void *)bytes.ptr(), bytes.size(), info.size);
 	if (font) {
-		ImGui_Impl_InitFonts();
+		rebuildFonts = true;
+		ImGuiIO& io = ImGui::GetIO();
+		unsigned char* pixels;
+		int width, height;
+		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 	}
 	fontsCache[info.fontName] = font;
 	

@@ -60,9 +60,8 @@ void GodotImGui::Bind_ImGui()
 			auto v = ImGui::GetWindowSize();
 			return Vector2(v.x, v.y);
 		});
-	BIND_STATIC_METHOD(D_METHOD("GetWindowWidth"), +[]()->double_t{return ImGui::GetWindowWidth();});
-	BIND_STATIC_METHOD(D_METHOD("GetWindowHeight"), +[]()->double_t{return ImGui::GetWindowHeight();});
-	
+	BIND_STATIC_METHOD(D_METHOD("GetWindowWidth"), ImGui::GetWindowWidth);
+	BIND_STATIC_METHOD(D_METHOD("GetWindowHeight"), ImGui::GetWindowHeight);
 	
 	BIND_STATIC_METHOD(D_METHOD("SetNextWindowPos", "pos", "cond", "pivot"),
 		+[](const Vector2 &pos, int64_t cond, const Vector2 &pivot) {
@@ -170,12 +169,10 @@ void GodotImGui::Bind_ImGui()
 			return Vector2(v.x, v.y);
 		});
 	
-	
 	BIND_STATIC_METHOD(D_METHOD("SetMouseDrawCursor", "drawCursor"),
 		+[](bool drawCursor) {
 			ImGui::GetIO().MouseDrawCursor = drawCursor;
 		});
-	
 	
 	BIND_STATIC_METHOD(D_METHOD("GetDefaultFont"),
 		+[]() {
@@ -211,11 +208,6 @@ void GodotImGui::Bind_ImGui()
 	BIND_STATIC_METHOD(D_METHOD("PopTabStop"), ImGui::PopTabStop);
 	BIND_STATIC_METHOD(D_METHOD("PushButtonRepeat", "repeat"), ImGui::PushButtonRepeat);
 	BIND_STATIC_METHOD(D_METHOD("PopButtonRepeat"), ImGui::PopButtonRepeat);
-	
-	
-	
-	
-	
 	
 	BIND_STATIC_METHOD(D_METHOD("Button", "label", "size"),
 		+[](const String &label, const Vector2 &size) {
@@ -255,13 +247,6 @@ void GodotImGui::Bind_ImGui()
 		});
 	BIND_STATIC_METHOD(D_METHOD("Bullet"), ImGui::Bullet);
 	
-	
-	
-	
-	
-	
-	
-	
 	BIND_STATIC_METHOD(D_METHOD("Separator"), ImGui::Separator);
 	BIND_STATIC_METHOD_ARGS(D_METHOD("SameLine", "offset_from_start_x", "spacing"), ImGui::SameLine, 0.0f, -1.0f);
 	BIND_STATIC_METHOD(D_METHOD("NewLine"), ImGui::NewLine);
@@ -280,20 +265,6 @@ void GodotImGui::Bind_ImGui()
 	BIND_STATIC_METHOD(D_METHOD("GetFrameHeight"), ImGui::GetFrameHeight);
 	BIND_STATIC_METHOD(D_METHOD("GetFrameHeightWithSpacing"), ImGui::GetFrameHeightWithSpacing);
 	
-	
-	
-	
-	
-	
-	
-	
-			
-	BIND_STATIC_METHOD(D_METHOD("Text", "str"),
-		+[](const String &str) {
-			auto s = str.utf8();
-			ImGui::TextUnformatted(s.ptr(), s.ptr()+s.length());
-		});
-	
 	BIND_STATIC_METHOD(D_METHOD("Image", "texture", "size", "srcRect", "tint", "borderColor"),
 		+[](Texture2D *texture, const Vector2 &size, const Rect2 &srcRect, const Color &tint, const Color &brdc) {
 			ImGui::Image(texture, {size.x, size.y}, {srcRect.position.x, srcRect.position.y},
@@ -307,24 +278,142 @@ void GodotImGui::Bind_ImGui()
 					{brdc.r, brdc.g, brdc.b, brdc.a});
 		});
 	
+	BIND_STATIC_METHOD(D_METHOD("Text", "str"),
+		+[](const String &str) {
+			auto s = str.utf8();
+			ImGui::TextUnformatted(s.ptr(), s.ptr()+s.length());
+		});
+	BIND_STATIC_METHOD(D_METHOD("TextColored", "color", "str"),
+		+[](const Color &c, const String &str) {
+			ImGui::PushStyleColor(ImGuiCol_Text, {c.r, c.g, c.b, c.a});
+			auto s = str.utf8();
+			ImGui::TextUnformatted(s.ptr(), s.ptr()+s.length());
+			ImGui::PopStyleColor();
+		});
+	BIND_STATIC_METHOD(D_METHOD("TextDisabled", "str"),
+		+[](const String &str) {
+			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+			auto s = str.utf8();
+			ImGui::TextUnformatted(s.ptr(), s.ptr()+s.length());
+			ImGui::PopStyleColor();
+		});
+	BIND_STATIC_METHOD(D_METHOD("TextWrapped", "str"),
+		+[](const String &str) {
+			ImGui::PushTextWrapPos(0.0f);
+			auto s = str.utf8();
+			ImGui::TextUnformatted(s.ptr(), s.ptr()+s.length());
+			ImGui::PopTextWrapPos();
+		});
+	BIND_STATIC_METHOD(D_METHOD("LabelText", "label", "str"),
+		+[](const String &label, const String &str) {
+			auto s = str.utf8();
+			auto l = label.utf8();
+			ImGui::LabelText(l.ptr(), "%s", s.ptr());
+		});
+	BIND_STATIC_METHOD(D_METHOD("BulletText", "str"),
+		+[](const String &str) {
+			auto s = str.utf8();
+			ImGui::BulletText("%s", s.ptr());
+		});
+	BIND_STATIC_METHOD(D_METHOD("SeparatorText", "label"),
+		+[](const String &str) {
+			auto s = str.utf8();
+			ImGui::SeparatorText(s.ptr());
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("Selectable", "label", "selected", "selectableFlags", "size"),
+		+[](const String &label, bool selected, int64_t selectableFlags, const Vector2 &size) {
+			return ImGui::Selectable(label.utf8().ptr(), selected, selectableFlags, {size.x, size.y});
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("CalcTextSize", "text", "wrapWidth"),
+		+[](const String &text, float wrapWidth) {
+			auto t = text.utf8();
+    		auto s = ImGui::CalcTextSize(t.ptr(), t.ptr()+t.size(), false, wrapWidth);
+			return Vector2(s.x, s.y);
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("GetClipboardText"),
+		+[]() {
+			return String::utf8(ImGui::GetClipboardText());
+		});
+	BIND_STATIC_METHOD(D_METHOD("SetClipboardText", "text"),
+		+[](const String &text) {
+    		ImGui::SetClipboardText(text.utf8().ptr());
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("SaveSettingsToString"),
+		+[]() {
+    		auto s = ImGui::SaveIniSettingsToMemory(nullptr);
+			return String::utf8(s);
+		});
+	BIND_STATIC_METHOD(D_METHOD("LoadSettingFromString"),
+		+[](const String &text) {
+			GodotImGui *self = ImGui::GetCurrentContext() ? (GodotImGui *)ImGui::GetIO().BackendPlatformUserData : nullptr;
+			if (self) {
+				self->forceLoadSettings = text.utf8().ptr();
+			}
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("BeginTable", "str_id", "column", "tableFlags", "outerSize", "innerWidth"),
+		+[](const String &id, int column, int64_t flags, const Vector2 &s, float innerWidth) {
+    		return ImGui::BeginTable(id.utf8().ptr(), column, flags, {s.x, s.y}, innerWidth);
+		});
+	BIND_STATIC_METHOD(D_METHOD("EndTable"), ImGui::EndTable);
+	BIND_STATIC_METHOD_ARGS(D_METHOD("TableNextRow", "row_flags", "min_row_height"), ImGui::TableNextRow, 0, 0.0f);
+	BIND_STATIC_METHOD(D_METHOD("TableNextColumn"), ImGui::TableNextColumn);
+	BIND_STATIC_METHOD(D_METHOD("TableSetColumnIndex", "column_n"), ImGui::TableSetColumnIndex);
+	BIND_STATIC_METHOD(D_METHOD("TableSetupColumn", "str_id", "tableColumnFlags", "initWidthOrWeight", "userId"),
+		+[](const String &label, int64_t flags, float initWorW, uint32_t userId) {
+    		ImGui::TableSetupColumn(label.utf8().ptr(), flags, initWorW, userId);
+		});
+	BIND_STATIC_METHOD(D_METHOD("TableSetupScrollFreeze", "cols", "rows"), ImGui::TableSetupScrollFreeze);
+	BIND_STATIC_METHOD(D_METHOD("TableHeader", "label"),
+		+[](const String &label) {
+    		ImGui::TableHeader(label.utf8().ptr());
+		});
+	BIND_STATIC_METHOD(D_METHOD("TableHeadersRow"), ImGui::TableHeadersRow);
+	BIND_STATIC_METHOD(D_METHOD("TableAngledHeadersRow"), ImGui::TableAngledHeadersRow);
+	BIND_STATIC_METHOD(D_METHOD("TableGetColumnCount"), ImGui::TableGetColumnCount);
+	BIND_STATIC_METHOD(D_METHOD("TableGetColumnIndex"), ImGui::TableGetColumnIndex);
+	BIND_STATIC_METHOD(D_METHOD("TableGetRowIndex"), ImGui::TableGetRowIndex);
+	BIND_STATIC_METHOD(D_METHOD("TableGetColumnName", "column_n"),
+		+[](int column_n) {
+    		auto ret = ImGui::TableGetColumnName(column_n);
+			return String::utf8(ret);
+		});
+	BIND_STATIC_METHOD_ARGS(D_METHOD("TableGetColumnFlags", "column_n"), ImGui::TableGetColumnFlags, -1);
+	BIND_STATIC_METHOD(D_METHOD("TableSetColumnEnabled", "column_n", "v"), ImGui::TableSetColumnEnabled);
+	BIND_STATIC_METHOD(D_METHOD("TableSetBgColor", "tableBgTarget", "color", "column_n"),
+		+[](int64_t target, const Color &c, int column_n) {
+    		ImGui::TableSetBgColor(target, c.to_rgba32(), column_n);
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("BeginCombo", "label", "previewValue", "comboFlags"),
+		+[](const String &label, const String &previewValue, int64_t comboFlags) {
+			return ImGui::BeginCombo(label.utf8().ptr(), previewValue==""?nullptr:previewValue.utf8().ptr(), comboFlags);
+		});
+	BIND_STATIC_METHOD(D_METHOD("EndCombo"), ImGui::EndCombo);
+	// TODO: Finish Combo
+	
+	
+	// TODO: Drag Sliders
+	// TODO: Regular Sliders
+	// TODO: Input with keyboard
+	// TODO: Color Picker
+	// TODO: Trees
+	// TODO: List Box
+	// TODO: Data Plotting
+	// TODO: Menu Bars
+	// TODO: Tooltips
+	// TODO: Popups
+	// TODO: TabBars
+	// TODO: Logging/Capture
+	// TODO: Drag and Drop
 	
 	
 	
-	IMGUI_API void          TextUnformatted(const char* text, const char* text_end = NULL); // raw text without formatting. Roughly equivalent to Text("%s", text) but: A) doesn't require null terminated string if 'text_end' is specified, B) it's faster, no memory copy is done, no buffer size limits, recommended for long chunks of text.
-	IMGUI_API void          Text(const char* fmt, ...)                                      IM_FMTARGS(1); // formatted text
-	IMGUI_API void          TextV(const char* fmt, va_list args)                            IM_FMTLIST(1);
-	IMGUI_API void          TextColored(const ImVec4& col, const char* fmt, ...)            IM_FMTARGS(2); // shortcut for PushStyleColor(ImGuiCol_Text, col); Text(fmt, ...); PopStyleColor();
-	IMGUI_API void          TextColoredV(const ImVec4& col, const char* fmt, va_list args)  IM_FMTLIST(2);
-	IMGUI_API void          TextDisabled(const char* fmt, ...)                              IM_FMTARGS(1); // shortcut for PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]); Text(fmt, ...); PopStyleColor();
-	IMGUI_API void          TextDisabledV(const char* fmt, va_list args)                    IM_FMTLIST(1);
-	IMGUI_API void          TextWrapped(const char* fmt, ...)                               IM_FMTARGS(1); // shortcut for PushTextWrapPos(0.0f); Text(fmt, ...); PopTextWrapPos();. Note that this won't work on an auto-resizing window if there's no other widgets to extend the window width, yoy may need to set a size using SetNextWindowSize().
-	IMGUI_API void          TextWrappedV(const char* fmt, va_list args)                     IM_FMTLIST(1);
-	IMGUI_API void          LabelText(const char* label, const char* fmt, ...)              IM_FMTARGS(2); // display text+label aligned the same way as value+label widgets
-	IMGUI_API void          LabelTextV(const char* label, const char* fmt, va_list args)    IM_FMTLIST(2);
-	IMGUI_API void          BulletText(const char* fmt, ...)                                IM_FMTARGS(1); // shortcut for Bullet()+Text()
-	IMGUI_API void          BulletTextV(const char* fmt, va_list args)                      IM_FMTLIST(1);
-	IMGUI_API void          SeparatorText(const char* label);                               // currently: formatted text with an horizontal line
-	
+	// TODO: Extract primitive rendering functions maybe?
 }
 
 #define ___NAME_TO_STR(__NAM) #__NAM
