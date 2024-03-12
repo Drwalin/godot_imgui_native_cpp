@@ -13,16 +13,17 @@
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/input_event.hpp>
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/classes/control.hpp>
+#include <godot_cpp/classes/shader.hpp>
+#include <godot_cpp/classes/shader_material.hpp>
 
 #include "../../imgui/imgui.h"
 
-#include "ImGuiMesh.hpp"
-
 using namespace godot;
 
-class GodotImGui : public Node
+class GodotImGui : public Node2D
 {
-	GDCLASS(GodotImGui, Node)
+	GDCLASS(GodotImGui, Node2D)
 public:
 	GodotImGui();
 	static void _bind_methods();
@@ -82,9 +83,25 @@ private:
 	
 	bool useInput = true;
 	
-	GodotImGuiMesh *mesh = nullptr;
-	
 	std::unordered_map<std::string, ImFont *> fontsCache;
 	std::vector<FontSizePair> fontsToLoad;
+	
+private:
+	
+	Control *GetNextChild();
+	void ClearChildren();
+	
+private:
+	Ref<Shader> shader;
+	Ref<ShaderMaterial> material;
+	
+	PackedInt32Array indices;
+	PackedVector2Array vertices;
+	PackedColorArray colors;
+	PackedVector2Array uvs;
+	
+	GodotImGui *godotImgui = nullptr;
+	
+	int nextFreeChild = 0;
 };
 #endif

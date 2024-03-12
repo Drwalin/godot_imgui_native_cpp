@@ -6,48 +6,13 @@
 #include <godot_cpp/classes/text_server.hpp>
 #include <godot_cpp/classes/engine.hpp>
 
-#include <godot_cpp/classes/input.hpp>
-#include <godot_cpp/classes/input_event_screen_touch.hpp>
-#include <godot_cpp/classes/input_event_key.hpp>
-#include <godot_cpp/classes/input_event_mouse.hpp>
-#include <godot_cpp/classes/input_event_from_window.hpp>
-#include <godot_cpp/classes/input_event_mouse_motion.hpp>
-#include <godot_cpp/classes/input_event_mouse_button.hpp>
-#include <godot_cpp/classes/input_event_with_modifiers.hpp>
-#include <godot_cpp/classes/input_event_screen_drag.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 
 #include "../include/godot_imgui_native/ImGui.hpp"
-#include "../include/godot_imgui_native/ImGuiMesh.hpp"
 #include "godot_cpp/classes/base_material3d.hpp"
 #include "godot_cpp/classes/immediate_mesh.hpp"
 
-GodotImGuiMesh::GodotImGuiMesh()
-{
-}
-
-GodotImGuiMesh::~GodotImGuiMesh()
-{
-}
-
-void GodotImGuiMesh::_bind_methods() {}
-
-void GodotImGuiMesh::_enter_tree()
-{
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
-	shader = ResourceLoader::get_singleton()->load("res://imgui/gui_shader.gdshader");
-	
-	material.instantiate();
-	material->set_shader(shader);
-	
-	this->set_texture_filter(TEXTURE_FILTER_LINEAR);
-	this->set_texture_repeat(TEXTURE_REPEAT_ENABLED);
-	this->set_light_mask(0);
-}
-
-Control *GodotImGuiMesh::GetNextChild()
+Control *GodotImGui::GetNextChild()
 {
 	while(this->get_child_count() <= nextFreeChild) {
 		auto c = memnew(Control());
@@ -59,7 +24,7 @@ Control *GodotImGuiMesh::GetNextChild()
 	return ret;
 }
 
-void GodotImGuiMesh::ClearChildren()
+void GodotImGui::ClearChildren()
 {
 	auto rs = RenderingServer::get_singleton();
 	nextFreeChild = 0;
@@ -69,7 +34,7 @@ void GodotImGuiMesh::ClearChildren()
 	}
 }
 
-void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
+void GodotImGui::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 {
 	ClearChildren();
 	

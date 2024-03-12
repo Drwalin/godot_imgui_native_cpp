@@ -8,12 +8,11 @@
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/text_server.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
+#include "godot_cpp/variant/rect2.hpp"
 
 #include <godot_cpp/classes/input.hpp>
 
 #include "../include/godot_imgui_native/ImGui.hpp"
-#include "../include/godot_imgui_native/ImGuiMesh.hpp"
-#include "godot_cpp/variant/rect2.hpp"
 
 #define BIND_STATIC_METHOD(M_NAME, CODE) \
 	ClassDB::bind_static_method("ImGui", M_NAME, CODE)

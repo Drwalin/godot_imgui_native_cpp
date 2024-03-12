@@ -7,12 +7,10 @@
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/file_access.hpp>
-
+#include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/input.hpp>
-#include <godot_cpp/classes/input_event_screen_touch.hpp>
 
 #include "../include/godot_imgui_native/ImGui.hpp"
-#include "../include/godot_imgui_native/ImGuiMesh.hpp"
 
 #define METHOD_NO_ARGS(CLASS, NAME)                                            \
 	ClassDB::bind_method(D_METHOD(#NAME), &CLASS::NAME);
@@ -26,10 +24,6 @@ GodotImGui::GodotImGui()
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-	
-	mesh = memnew(GodotImGuiMesh());
-	mesh->godotImgui = this;
-	this->add_child(mesh);
 	
 	ImGui_Impl_Init();
 }
@@ -59,10 +53,22 @@ void GodotImGui::_enter_tree()
 		return;
 	}
 	
-	ImGui_Impl_BeginFrame();
+	if (Engine::get_singleton()->is_editor_hint()) {
+		return;
+	}
+	shader = ResourceLoader::get_singleton()->load("res://imgui/gui_shader.gdshader");
+	
+	material.instantiate();
+	material->set_shader(shader);
+	
+	this->set_texture_filter(TEXTURE_FILTER_LINEAR);
+	this->set_texture_repeat(TEXTURE_REPEAT_ENABLED);
+	this->set_light_mask(0);
 	
 	auto rs = RenderingServer::get_singleton();
  	rs->connect("frame_pre_draw", Callable(this, "ImGui_EndFrame"));
+	
+	ImGui_Impl_BeginFrame();
 }
 
 void GodotImGui::_exit_tree()
@@ -72,12 +78,13 @@ void GodotImGui::_exit_tree()
 	}
 	
 	if (imGuiContext) {
+		auto rs = RenderingServer::get_singleton();
+		rs->disconnect("frame_pre_draw", Callable(this, "ImGui_EndFrame"));
+		
 		ImGui_Impl_EndFrame();
 		ImGui_Impl_Shutdown();
 		ImGui::DestroyContext();
 		imGuiContext = nullptr;
-		
-		remove_child(mesh);
 	}
 }
 
@@ -117,11 +124,6 @@ void GodotImGui::ImGui_Impl_NewFrame()
     io.DeltaTime = dt;
 
     ImGui_Impl_UpdateMouseCursor();
-}
-
-void GodotImGui::ImGui_Impl_RenderDrawData(ImDrawData* draw_data)
-{
-	mesh->ImGui_Impl_RenderDrawData(draw_data);
 }
 
 void GodotImGui::ImGui_Impl_BeginFrame()
