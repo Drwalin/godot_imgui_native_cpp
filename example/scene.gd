@@ -5,6 +5,7 @@ extends Node2D
 var font:int = 0;
 func _ready():
 	font = $"../GodotImGui".GetFont("res://dvu_sans_mono.ttf", 20.0);
+	ImGui.SetMouseDrawCursor(true);
 	pass;
 
 var img:Texture2D = load("res://icon.svg");

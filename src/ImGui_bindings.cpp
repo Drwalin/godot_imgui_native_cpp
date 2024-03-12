@@ -181,6 +181,10 @@ void GodotImGui::Bind_ImGui()
 		});
 	
 	
+	BIND_STATIC_METHOD(D_METHOD("SetMouseDrawCursor", "drawCursor"),
+		+[](bool drawCursor) {
+			ImGui::GetIO().MouseDrawCursor = drawCursor;
+		});
 	
 	
 	BIND_STATIC_METHOD(D_METHOD("GetDefaultFont"),
