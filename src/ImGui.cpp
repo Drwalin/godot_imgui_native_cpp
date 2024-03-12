@@ -46,6 +46,14 @@ void GodotImGui::_bind_methods()
 	METHOD_NO_ARGS(GodotImGui, IsInputEnabled);
 	
 	ClassDB::bind_method(D_METHOD("ImGui_NewFrame"), &GodotImGui::ImGui_Impl_BeginFrame);
+	ClassDB::bind_method(D_METHOD("ImGui_EndFrame"), &GodotImGui::ImGui_Impl_EndFrame);
+	
+	METHOD_NO_ARGS(GodotImGui, GetFontTexture);
+}
+
+Texture2D *GodotImGui::GetFontTexture()
+{
+	return fontTexture.ptr();
 }
 
 void GodotImGui::_enter_tree()
@@ -56,6 +64,9 @@ void GodotImGui::_enter_tree()
 	ImGui_Impl_Init();
 	
 	ImGui_Impl_BeginFrame();
+	
+	auto rs = RenderingServer::get_singleton();
+ 	rs->connect("frame_pre_draw", Callable(this, "ImGui_EndFrame"));
 }
 
 void GodotImGui::_exit_tree()
@@ -153,6 +164,30 @@ void GodotImGui::ImGui_Impl_InitFonts()
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 	
+	uint32_t *hex = (uint32_t *)pixels;
+	for (int i=0; i<width*height; ++i) {
+		if (hex[i]>>24) {
+		} else {
+// 			hex[i] = Color((i%width)/(width-1.0), i/(width*height*1.0), 0, 1).to_rgba32();
+// 			hex[i] = 0xFF<<24;
+		}
+	}
+	
+	
+	
+// 	printf("\n\nColors:");
+// 	for (int i=0; i<width*height; ++i) {
+// 		if (i%width == 0) {
+// 			printf("\n");
+// 		}
+// 		uint32_t v = hex[i];
+// 		printf(((v>>24)&0xFF)?"#":" ");
+// 	}
+// 	printf("\n\n");
+	
+	
+	
+	
 	PackedByteArray _pixels;
 	_pixels.resize(width*height*4);
 	memcpy((void *)_pixels.ptr(), pixels, width*height*4);
@@ -164,6 +199,20 @@ void GodotImGui::ImGui_Impl_InitFonts()
 	fontTexture = ImageTexture::create_from_image(image);
 	
     io.Fonts->SetTexID((ImTextureID)(intptr_t)fontTexture.ptr());
+	
+	
+	
+	
+// 	auto A = fontTexture->get_image();
+// 	printf("\n\nColors:");
+// 	for (int i=0; i<width*height; ++i) {
+// 		if (i%width == 0) {
+// 			printf("\n");
+// 		}
+// 		uint32_t v = A->get_pixel(i%width, i/width).to_abgr32();
+// 		printf(((v>>24)&0xFF)?"#":" ");
+// 	}
+// 	printf("\n\n");
 }
 
 void GodotImGui::ImGui_Impl_Shutdown()

@@ -8,9 +8,15 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	$"../Button/GodotImGui".ImGui_NewFrame();
-	print("Using imgui");
+	$"../GodotImGui".ImGui_NewFrame();
 	ImGui.Begin("Nazwa", 0);
 	ImGui.Text("Hello World");
+	ImGui.Text("Hello World");
+	ImGui.Text("Hello World");
+	ImGui.Text("Hello World");
+	ImGui.Text("Hello World");
+	ImGui.Text("Hello World");
+	ImGui.Text("Hello World");
 	ImGui.End();
+	
 	pass
