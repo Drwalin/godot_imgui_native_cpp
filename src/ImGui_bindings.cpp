@@ -21,6 +21,7 @@
 
 #include "../include/godot_imgui_native/ImGui.hpp"
 #include "../include/godot_imgui_native/ImGuiMesh.hpp"
+#include "godot_cpp/variant/rect2.hpp"
 
 #define BIND_STATIC_METHOD(M_NAME, CODE) \
 	ClassDB::bind_static_method("ImGui", M_NAME, CODE)
@@ -244,6 +245,13 @@ void GodotImGui::Bind_ImGui()
 		+[](const String &str) {
 			auto s = str.utf8();
 			ImGui::TextUnformatted(s.ptr(), s.ptr()+s.length());
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("Image", "texture", "size", "srcRect", "tint", "borderColor"),
+		+[](Texture2D *texture, const Vector2 &size, const Rect2 &srcRect, const Color &tint, const Color &brdc) {
+			ImGui::Image(texture, {size.x, size.y}, {srcRect.position.x, srcRect.position.y},
+					{srcRect.get_end().x, srcRect.get_end().y}, {tint.r, tint.g, tint.b, tint.a},
+					{brdc.r, brdc.g, brdc.b, brdc.a});
 		});
 	
 	

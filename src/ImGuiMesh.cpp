@@ -37,12 +37,36 @@ void GodotImGuiMesh::_enter_tree()
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-// 	shader = ResourceLoader::get_singleton()->load("res://imgui/gui_shader.gdshader");
+	shader = ResourceLoader::get_singleton()->load("res://imgui/gui_shader.gdshader");
 	
-// 	mat.instantiate();
+	material.instantiate();
+	material->set_shader(shader);
+	
 	this->set_texture_filter(TEXTURE_FILTER_LINEAR);
 	this->set_texture_repeat(TEXTURE_REPEAT_ENABLED);
 	this->set_light_mask(0);
+}
+
+Control *GodotImGuiMesh::GetNextChild()
+{
+	while(this->get_child_count() <= nextFreeChild) {
+		auto c = memnew(Control());
+		c->set_material(material->duplicate());
+		add_child(c);
+	}
+	auto ret = (Control*)(this->get_child(nextFreeChild));
+	++nextFreeChild;
+	return ret;
+}
+
+void GodotImGuiMesh::ClearChildren()
+{
+	auto rs = RenderingServer::get_singleton();
+	nextFreeChild = 0;
+	for (int i=0; i<get_child_count(); ++i) {
+		RID rid = ((Control *)get_child(i))->get_canvas_item();
+		rs->canvas_item_clear(rid);
+	}
 }
 
 void GodotImGuiMesh::_exit_tree() {
@@ -63,25 +87,18 @@ void GodotImGuiMesh::_process(double_t delta)
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-// 	godotImgui->ImGui_Impl_EndFrame();
 }
 
 void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 {
+	ClearChildren();
+	
 	// Avoid rendering when minimized
 	if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
 		return;
 	
 	auto rs = RenderingServer::get_singleton();
 
-	freeMaterialId = 0;
-
-	// TODO: set ortographic projection matrix here if necssary
-
-	RID selfRid = this->get_canvas_item();
-	
-	rs->canvas_item_clear(selfRid);
-	
 	for (int n = 0; n < draw_data->CmdListsCount; n++) {
 		const ImDrawList *cmd_list = draw_data->CmdLists[n];
 
@@ -117,14 +134,18 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 				}
 			} else {
 				// Project scissor/clipping rectangles into framebuffer space
-				ImVec2 clip_min(pcmd->ClipRect.x - clip_off.x,
+				Vector2 clip_min(pcmd->ClipRect.x - clip_off.x,
 								pcmd->ClipRect.y - clip_off.y);
-				ImVec2 clip_max(pcmd->ClipRect.z - clip_off.x,
+				Vector2 clip_max(pcmd->ClipRect.z - clip_off.x,
 								pcmd->ClipRect.w - clip_off.y);
 				if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
 					continue;
 				
-// 				mat->set_shader_parameter("scissor_test", clip);
+				Control *node = GetNextChild();
+				auto mat = ((ShaderMaterial *)(node->get_material().ptr()));
+				mat->set_shader_parameter("scissor_test", Vector4(clip_min.x, clip_min.y, clip_max.x, clip_max.y));
+				
+				RID selfRid = node->get_canvas_item();
 				
 				auto indicesSlice = indices.slice(pcmd->IdxOffset, pcmd->IdxOffset + pcmd->ElemCount);
 				
@@ -132,8 +153,7 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 				Texture2D *tex = (Texture2D *)(pcmd->GetTexID());
 				if (tex) {
 					texRid = tex->get_rid();
-					rs->canvas_item_add_texture_rect(selfRid, {0,0,tex->get_size().x/3,tex->get_size().y/3}, texRid, false, {1,1,1,1});
-					tex->draw(selfRid, {100, 100}, {1,0.2,0.2,1});
+					mat->set_shader_parameter("TEXTURE", tex);
 				}
 				
 				rs->canvas_item_add_triangle_array(selfRid, indicesSlice, vertices, colors, uvs, {}, {}, texRid);
@@ -141,5 +161,4 @@ void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 			}
 		}
 	}
-	
 }
