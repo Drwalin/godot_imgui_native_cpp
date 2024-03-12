@@ -21,7 +21,6 @@
 #include <godot_cpp/classes/input_event_screen_drag.hpp>
 
 #include "../include/godot_imgui_native/ImGui.hpp"
-#include "../include/godot_imgui_native/ImGuiMesh.hpp"
 
 ImGuiKey GodotToImGuiKeyCode(int keycode);
 
