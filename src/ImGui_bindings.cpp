@@ -25,6 +25,8 @@
 
 #define BIND_STATIC_METHOD(M_NAME, CODE) \
 	ClassDB::bind_static_method("ImGui", M_NAME, CODE)
+#define BIND_STATIC_METHOD_ARGS(M_NAME, CODE, ...) \
+	ClassDB::bind_static_method("ImGui", M_NAME, CODE, __VA_ARGS__)
 
 void CrossCallFrom_ImGui_to_Godot_ImGui_method_bingings();
 void CrossCallFrom_ImGui_to_Godot_ImGui_method_bingings()
@@ -215,23 +217,68 @@ void GodotImGui::Bind_ImGui()
 	
 	
 	
+	BIND_STATIC_METHOD(D_METHOD("Button", "label", "size"),
+		+[](const String &label, const Vector2 &size) {
+			return ImGui::Button(label.utf8().ptr(), {size.x, size.y});
+		});
+	BIND_STATIC_METHOD(D_METHOD("SmallButton", "label"),
+		+[](const String &label) {
+			return ImGui::SmallButton(label.utf8().ptr());
+		});
+	BIND_STATIC_METHOD(D_METHOD("InvisibleButton", "str_id", "size", "flags"),
+		+[](const String &str_id, const Vector2 &size, int64_t flags) {
+			return ImGui::InvisibleButton(str_id.utf8().ptr(), {size.x, size.y}, flags);
+		});
+	BIND_STATIC_METHOD(D_METHOD("ArrowButton", "label", "dir"),
+		+[](const String &label, int64_t dir) {
+			return ImGui::ArrowButton(label.utf8().ptr(), dir);
+		});
+	BIND_STATIC_METHOD(D_METHOD("Checkbox", "label", "checkByDefault"),
+		+[](const String &label, bool defaultValue) {
+			bool val = defaultValue;
+			bool ret = ImGui::Checkbox(label.utf8().ptr(), &val);
+			return Vector2i(ret?1:0, val);
+		});
+	BIND_STATIC_METHOD(D_METHOD("CheckboxFlags", "label", "selected", "mask"),
+		+[](const String &label, int32_t selected, int32_t mask) {
+			int32_t ret = ImGui::CheckboxFlags(label.utf8().ptr(), &selected, mask);
+			return Vector2i(ret, selected);
+		});
+	BIND_STATIC_METHOD(D_METHOD("RadioButton", "label", "active"),
+		+[](const String &label, bool active) {
+			return ImGui::RadioButton(label.utf8().ptr(), active);
+		});
+	BIND_STATIC_METHOD(D_METHOD("ProgressBar", "fraction", "size", "overlay"),
+		+[](float fraction, const Vector2 &size, const String &overlay) {
+			auto str = overlay.utf8();
+			ImGui::ProgressBar(fraction, {size.x, size.y}, str.ptr()[0]==0?nullptr:str.ptr());
+		});
+	BIND_STATIC_METHOD(D_METHOD("Bullet"), ImGui::Bullet);
 	
 	
 	
-// 	void Separator()
-// 	void SameLine(float offset_from_start_x=0.0f, float spacing=-1.0f)
-// 	void NewLine()
-// 	void Spacing()
-// 	void Dummy(const ImVec2& size)
-// 	void Indent(float indent_w = 0.0f)
-// 	void Unindent(float indent_w = 0.0f)
-// 	void BeginGroup()
-// 	void EndGroup()
-// 	void AlignTextToFramePadding()
-// 	float GetTextLineHeight()
-// 	float GetTextLineHeightWithSpacing()
-// 	float GetFrameHeight()
-// 	float GetFrameHeightWithSpacing()
+	
+	
+	
+	
+	
+	BIND_STATIC_METHOD(D_METHOD("Separator"), ImGui::Separator);
+	BIND_STATIC_METHOD_ARGS(D_METHOD("SameLine", "offset_from_start_x", "spacing"), ImGui::SameLine, 0.0f, -1.0f);
+	BIND_STATIC_METHOD(D_METHOD("NewLine"), ImGui::NewLine);
+	BIND_STATIC_METHOD(D_METHOD("Spacing"), ImGui::Spacing);
+	BIND_STATIC_METHOD(D_METHOD("Dummy", "size"),
+		+[](const Vector2 &size) {
+			ImGui::Dummy({size.x, size.y});
+		});
+	BIND_STATIC_METHOD_ARGS(D_METHOD("Indent", "indent_w"), ImGui::Indent, 0.0f);
+	BIND_STATIC_METHOD_ARGS(D_METHOD("Unindent", "indent_w"), ImGui::Unindent, 0.0f);
+	BIND_STATIC_METHOD(D_METHOD("BeginGroup"), ImGui::BeginGroup);
+	BIND_STATIC_METHOD(D_METHOD("EndGroup"), ImGui::EndGroup);
+	BIND_STATIC_METHOD(D_METHOD("AlignTextToFramePadding"), ImGui::AlignTextToFramePadding);
+	BIND_STATIC_METHOD(D_METHOD("GetTextLineHeight"), ImGui::GetTextLineHeight);
+	BIND_STATIC_METHOD(D_METHOD("GetTextLineHeightWithSpacing"), ImGui::GetTextLineHeightWithSpacing);
+	BIND_STATIC_METHOD(D_METHOD("GetFrameHeight"), ImGui::GetFrameHeight);
+	BIND_STATIC_METHOD(D_METHOD("GetFrameHeightWithSpacing"), ImGui::GetFrameHeightWithSpacing);
 	
 	
 	
@@ -250,6 +297,12 @@ void GodotImGui::Bind_ImGui()
 	BIND_STATIC_METHOD(D_METHOD("Image", "texture", "size", "srcRect", "tint", "borderColor"),
 		+[](Texture2D *texture, const Vector2 &size, const Rect2 &srcRect, const Color &tint, const Color &brdc) {
 			ImGui::Image(texture, {size.x, size.y}, {srcRect.position.x, srcRect.position.y},
+					{srcRect.get_end().x, srcRect.get_end().y}, {tint.r, tint.g, tint.b, tint.a},
+					{brdc.r, brdc.g, brdc.b, brdc.a});
+		});
+	BIND_STATIC_METHOD(D_METHOD("ImageButton", "str_id", "texture", "size", "srcRect", "tint", "borderColor"),
+		+[](const String &str_id, Texture2D *texture, const Vector2 &size, const Rect2 &srcRect, const Color &tint, const Color &brdc) {
+    		return ImGui::ImageButton(str_id.utf8().ptr(), texture, {size.x, size.y}, {srcRect.position.x, srcRect.position.y},
 					{srcRect.get_end().x, srcRect.get_end().y}, {tint.r, tint.g, tint.b, tint.a},
 					{brdc.r, brdc.g, brdc.b, brdc.a});
 		});

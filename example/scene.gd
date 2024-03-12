@@ -7,8 +7,12 @@ func _ready():
 
 var img:Texture2D = load("res://icon.svg");
 
+static var checkbox:Vector2i = Vector2i(0,1);
+
+static var time:float = 0;
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	time += delta;
 	$"../GodotImGui".ImGui_NewFrame();
 	ImGui.Begin("Nazwa", 0);
 	ImGui.Text("Hello World");
@@ -16,13 +20,21 @@ func _process(delta):
 	ImGui.Text("Hello World");
 	ImGui.Text("Hello World");
 	ImGui.Text("Hello World");
+	ImGui.ProgressBar(time/10, Vector2(100, 20), "");
+	if time > 10:
+		time -= 10;
 	ImGui.Text("Hello World");
-	ImGui.Text("Hello World");
-	ImGui.Image(img, Vector2(50, 50), Rect2(0, 0, 1, 1), Color(1,1,1,1), Color(0,0,0,1));
+	if (ImGui.ImageButton("imgButt", img, Vector2(50, 50), Rect2(0, 0, 1, 1), Color(1,1,1,1), Color(0,0,0,1))):
+		print("Image button pressed");
 	ImGui.BeginChild("a", Vector2(100, 50), 0, 0);
 	ImGui.Text("Hello World");
 	ImGui.Image(img, Vector2(50, 50), Rect2(0, 0, 1, 1), Color(1,1,1,1), Color(0,1,0,1));
 	ImGui.EndChild();
+	if (ImGui.Button("Przycisk", Vector2(40, 40))):
+		print("Pressed");
+	checkbox = ImGui.CheckboxFlags("Check", checkbox.y, 4);
+	if (checkbox.x !=0):
+		print("checkbox: ", checkbox.y);
 	ImGui.End();
 	
 	pass
