@@ -29,6 +29,7 @@ public:
 	
 	void _enter_tree() override;
 	void _exit_tree() override;
+	void _process(double_t dt) override;
 	void _notification(int what);
 	virtual void _input(const Ref<InputEvent> &event) override;
 	virtual void _shortcut_input(const Ref<InputEvent> &event) override;

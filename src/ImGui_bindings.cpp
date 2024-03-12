@@ -10,14 +10,6 @@
 #include <godot_cpp/classes/image_texture.hpp>
 
 #include <godot_cpp/classes/input.hpp>
-#include <godot_cpp/classes/input_event_screen_touch.hpp>
-#include <godot_cpp/classes/input_event_key.hpp>
-#include <godot_cpp/classes/input_event_mouse.hpp>
-#include <godot_cpp/classes/input_event_from_window.hpp>
-#include <godot_cpp/classes/input_event_mouse_motion.hpp>
-#include <godot_cpp/classes/input_event_mouse_button.hpp>
-#include <godot_cpp/classes/input_event_with_modifiers.hpp>
-#include <godot_cpp/classes/input_event_screen_drag.hpp>
 
 #include "../include/godot_imgui_native/ImGui.hpp"
 #include "../include/godot_imgui_native/ImGuiMesh.hpp"
@@ -28,7 +20,6 @@
 #define BIND_STATIC_METHOD_ARGS(M_NAME, CODE, ...) \
 	ClassDB::bind_static_method("ImGui", M_NAME, CODE, __VA_ARGS__)
 
-void CrossCallFrom_ImGui_to_Godot_ImGui_method_bingings();
 void CrossCallFrom_ImGui_to_Godot_ImGui_method_bingings()
 {
 	GodotImGui::Bind_ImGui();
