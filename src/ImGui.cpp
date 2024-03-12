@@ -6,6 +6,7 @@
 #include <godot_cpp/classes/text_server.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/file_access.hpp>
 
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/input_event_screen_touch.hpp>
@@ -32,11 +33,12 @@ GodotImGui::GodotImGui()
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-	UtilityFunctions::print("GodotImGui::GodotImGui()");
 	
 	mesh = memnew(GodotImGuiMesh());
 	mesh->godotImgui = this;
 	this->add_child(mesh);
+	
+	ImGui_Impl_Init();
 }
 
 void GodotImGui::_bind_methods()
@@ -49,6 +51,8 @@ void GodotImGui::_bind_methods()
 	ClassDB::bind_method(D_METHOD("ImGui_EndFrame"), &GodotImGui::ImGui_Impl_EndFrame);
 	
 	METHOD_NO_ARGS(GodotImGui, GetFontTexture);
+	
+	METHOD_ARGS(GodotImGui, GetFont, "path", "sizePixels");
 }
 
 Texture2D *GodotImGui::GetFontTexture()
@@ -61,7 +65,7 @@ void GodotImGui::_enter_tree()
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-	ImGui_Impl_Init();
+// 	ImGui_Impl_Init();
 	
 	ImGui_Impl_BeginFrame();
 	
@@ -76,27 +80,13 @@ void GodotImGui::_exit_tree()
 	}
 // 	ImGui_Impl_EndFrame();
 	
-	ImGui_Impl_Shutdown();
-	ImGui::DestroyContext();
-	
-	remove_child(mesh);
-	delete mesh;
-}
-
-void GodotImGui::_ready()
-{
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
+	if (imGuiContext) {
+		ImGui_Impl_Shutdown();
+		ImGui::DestroyContext();
+		imGuiContext = nullptr;
+		
+		remove_child(mesh);
 	}
-	this->set_process_priority(0x80);
-}
-
-void GodotImGui::_process(double_t delta)
-{
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
-	ImGui_Impl_NewFrame();
 }
 
 void GodotImGui::_notification(int what)
@@ -145,80 +135,6 @@ void GodotImGui::_unhandled_key_input(const Ref<InputEvent> &event)
 
 
 
-
-void GodotImGui::ImGui_Impl_Init()
-{
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	ImGui::StyleColorsDark();
-	
-	// TODO: init godot imgui here
-	ImGui_Impl_InitFonts();
-}
-
-void GodotImGui::ImGui_Impl_InitFonts()
-{
-    ImGuiIO& io = ImGui::GetIO();
-    unsigned char* pixels;
-    int width, height;
-    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-	
-	uint32_t *hex = (uint32_t *)pixels;
-	for (int i=0; i<width*height; ++i) {
-		if (hex[i]>>24) {
-		} else {
-// 			hex[i] = Color((i%width)/(width-1.0), i/(width*height*1.0), 0, 1).to_rgba32();
-// 			hex[i] = 0xFF<<24;
-		}
-	}
-	
-	
-	
-// 	printf("\n\nColors:");
-// 	for (int i=0; i<width*height; ++i) {
-// 		if (i%width == 0) {
-// 			printf("\n");
-// 		}
-// 		uint32_t v = hex[i];
-// 		printf(((v>>24)&0xFF)?"#":" ");
-// 	}
-// 	printf("\n\n");
-	
-	
-	
-	
-	PackedByteArray _pixels;
-	_pixels.resize(width*height*4);
-	memcpy((void *)_pixels.ptr(), pixels, width*height*4);
-	
-	Ref<Image> image;
-	image.instantiate();
-	image->set_data(width, height, false, Image::Format::FORMAT_RGBA8, _pixels);
-	
-	fontTexture = ImageTexture::create_from_image(image);
-	
-    io.Fonts->SetTexID((ImTextureID)(intptr_t)fontTexture.ptr());
-	
-	
-	
-	
-// 	auto A = fontTexture->get_image();
-// 	printf("\n\nColors:");
-// 	for (int i=0; i<width*height; ++i) {
-// 		if (i%width == 0) {
-// 			printf("\n");
-// 		}
-// 		uint32_t v = A->get_pixel(i%width, i/width).to_abgr32();
-// 		printf(((v>>24)&0xFF)?"#":" ");
-// 	}
-// 	printf("\n\n");
-}
-
-void GodotImGui::ImGui_Impl_Shutdown()
-{
-	// TODO: destroy godot imgui here
-}
 
 void GodotImGui::ImGui_Impl_NewFrame()
 {
@@ -425,9 +341,13 @@ void GodotImGui::ImGui_Impl_ProcessEvent(InputEvent *event)
 
 void GodotImGui::ImGui_Impl_BeginFrame()
 {
-	if (hasFrameBegun == false) {
-		hasFrameBegun = true;
+	if (hasFrameBegun == false && imGuiContext) {
+		for (auto &it : fontsToLoad) {
+			LoadFont(it);
+		}
+		fontsToLoad.clear();
 		
+		hasFrameBegun = true;
 		ImGui_Impl_NewFrame();
 		ImGui::NewFrame();
 	}
@@ -437,8 +357,10 @@ void GodotImGui::ImGui_Impl_EndFrame()
 	if (hasFrameBegun == true) {
 		hasFrameBegun = false;
 		
-		ImGui::Render();
-		ImGui_Impl_RenderDrawData(ImGui::GetDrawData());
+		if (imGuiContext) {
+			ImGui::Render();
+			ImGui_Impl_RenderDrawData(ImGui::GetDrawData());
+		}
 	}
 }
 
@@ -452,6 +374,8 @@ void GodotImGui::ImGui_Impl_UpdateMouseCursor()
     ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
     if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None)
     {
+		Input::get_singleton()->set_mouse_mode(Input::MouseMode::MOUSE_MODE_HIDDEN);
+		UtilityFunctions::print("Hide os cursor here!");
         // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
 //         al_set_mouse_cursor(bd->Display, bd->MouseCursorInvisible);
     }
@@ -470,4 +394,94 @@ void GodotImGui::ImGui_Impl_UpdateMouseCursor()
         }
 		gio.set_custom_mouse_cursor(nullptr, cursor_id);
     }
+}
+
+void GodotImGui::ImGui_Impl_Init()
+{
+	IMGUI_CHECKVERSION();
+	imGuiContext = ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.BackendPlatformUserData = this;
+// 	ImGui::StyleColorsDark();
+	ImGui::StyleColorsClassic();
+	io.MouseDrawCursor = true;
+	
+	// TODO: init godot imgui here
+	ImGui_Impl_InitFonts();
+}
+
+void GodotImGui::ImGui_Impl_InitFonts()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    unsigned char* pixels;
+    int width, height;
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+	
+	PackedByteArray _pixels;
+	_pixels.resize(width*height*4);
+	memcpy((void *)_pixels.ptr(), pixels, width*height*4);
+	
+	Ref<Image> image;
+	image.instantiate();
+	image->set_data(width, height, false, Image::Format::FORMAT_RGBA8, _pixels);
+	
+	fontTexture = ImageTexture::create_from_image(image);
+	
+    io.Fonts->SetTexID((ImTextureID)(intptr_t)fontTexture.ptr());
+}
+
+void GodotImGui::ImGui_Impl_Shutdown()
+{
+    ImGuiIO& io = ImGui::GetIO();
+	io.BackendPlatformUserData = nullptr;
+	fontsCache.clear();
+	// TODO: destroy godot imgui here
+}
+
+
+ImFont *GodotImGui::LoadFont(const struct FontSizePair &info)
+{
+	auto bytes = FileAccess::get_file_as_bytes(info.filePath);
+	if (bytes.size() == 0) {
+		return nullptr;
+	}
+	
+    ImGuiIO& io = ImGui::GetIO();
+	ImFont *font = io.Fonts->AddFontFromMemoryTTF((void *)bytes.ptr(), bytes.size(), info.size);
+	if (font) {
+		ImGui_Impl_InitFonts();
+	}
+	fontsCache[info.fontName] = font;
+	
+	return font;
+}
+
+ImFont *GodotImGui::LoadFont(const String &path, float sizePixels)
+{
+	if (path.ends_with(".ttf") == false) {
+		return nullptr;
+	}
+	
+	std::string fontName = path.utf8().ptr();
+	fontName += ":" + std::to_string((int)(sizePixels*100.0f));
+	
+	auto it = fontsCache.find(fontName);
+	if (it != fontsCache.end()) {
+		return it->second;
+	}
+	
+	FontSizePair fontInfo{fontName, path, sizePixels};
+	
+	if (hasFrameBegun) {
+		fontsToLoad.push_back(fontInfo);
+		UtilityFunctions::print("Trying to load font inside a frame.");
+		return nullptr;
+	}
+	
+	return LoadFont(fontInfo);
+}
+
+int64_t GodotImGui::GetFont(const String &path, float sizePixels)
+{
+	return (int64_t)LoadFont(path, sizePixels);
 }

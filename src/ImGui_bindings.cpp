@@ -183,8 +183,16 @@ void GodotImGui::Bind_ImGui()
 	
 	
 	
+	BIND_STATIC_METHOD(D_METHOD("GetDefaultFont"),
+		+[]() {
+			return (int64_t)ImGui::GetIO().FontDefault;
+		});
 	
-	
+	BIND_STATIC_METHOD(D_METHOD("PushFont", "font"),
+		+[](int64_t fontPtr) {
+			ImGui::PushFont((ImFont *)fontPtr);
+		});
+	BIND_STATIC_METHOD(D_METHOD("PopFont"), ImGui::PopFont);
 	BIND_STATIC_METHOD(D_METHOD("PushStyleColor", "style_color_id", "color"),
 		+[](int64_t idx, const Color &c) {
 			ImGui::PushStyleColor(idx, {c.r, c.g, c.b, c.a});
@@ -205,8 +213,6 @@ void GodotImGui::Bind_ImGui()
 		+[](int64_t count) {
 			ImGui::PopStyleVar(count);
 		});
-	
-	
 	BIND_STATIC_METHOD(D_METHOD("PushTabStop", "tab_stop"), ImGui::PushTabStop);
 	BIND_STATIC_METHOD(D_METHOD("PopTabStop"), ImGui::PopTabStop);
 	BIND_STATIC_METHOD(D_METHOD("PushButtonRepeat", "repeat"), ImGui::PushButtonRepeat);
