@@ -69,26 +69,6 @@ void GodotImGuiMesh::ClearChildren()
 	}
 }
 
-void GodotImGuiMesh::_exit_tree() {
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
-}
-
-void GodotImGuiMesh::_ready()
-{
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
-}
-
-void GodotImGuiMesh::_process(double_t delta)
-{
-	if (Engine::get_singleton()->is_editor_hint()) {
-		return;
-	}
-}
-
 void GodotImGuiMesh::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 {
 	ClearChildren();

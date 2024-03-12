@@ -2,8 +2,10 @@ extends Node2D
 
 
 # Called when the node enters the scene tree for the first time.
+var font:int = 0;
 func _ready():
-	pass # Replace with function body.
+	font = $"../GodotImGui".GetFont("res://dvu_sans_mono.ttf", 20.0);
+	pass;
 
 var img:Texture2D = load("res://icon.svg");
 
@@ -19,7 +21,22 @@ func _process(delta):
 	ImGui.Text("Hello World");
 	ImGui.Text("Hello World");
 	ImGui.Text("Hello World");
+	
+	font = $"../GodotImGui".GetFont("res://dvu_sans_mono.ttf", 20.0);
+	ImGui.PushFont(font);
 	ImGui.Text("Hello World");
+	ImGui.PopFont();
+	
+	font = $"../GodotImGui".GetFont("res://dvu_sans_mono.ttf", 5.0);
+	ImGui.PushFont(font);
+	ImGui.Text("Hello World");
+	ImGui.PopFont();
+	
+	font = $"../GodotImGui".GetFont("res://dvu_sans_mono.ttf", 50.0);
+	ImGui.PushFont(font);
+	ImGui.Text("Hello World");
+	ImGui.PopFont();
+	
 	ImGui.ProgressBar(time/10, Vector2(100, 20), "");
 	if time > 10:
 		time -= 10;

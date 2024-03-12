@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <chrono>
+#include <unordered_map>
 
 #include <godot_cpp/godot.hpp>
 #include <godot_cpp/classes/node2d.hpp>
@@ -28,8 +29,6 @@ public:
 	
 	void _enter_tree() override;
 	void _exit_tree() override;
-	void _ready() override;
-	void _process(double_t delta) override;
 	void _notification(int what);
 	virtual void _input(const Ref<InputEvent> &event) override;
 	virtual void _shortcut_input(const Ref<InputEvent> &event) override;
@@ -41,6 +40,16 @@ public:
 	bool IsInputEnabled();
 	
 	Texture2D *GetFontTexture();
+	
+	struct FontSizePair {
+		std::string fontName = "";
+		String filePath = "";
+		float size;
+	};
+	ImFont *LoadFont(const FontSizePair &info);
+	ImFont *LoadFont(const String &path, float sizePixels);
+	int64_t GetFont(const String &path, float sizePixels);
+	
 	
 public: // Dear ImGui
 	void ImGui_Impl_Init();
@@ -64,6 +73,8 @@ public: // ImGui bindings
 private:
 	Ref<Texture2D> fontTexture;
 	
+	ImGuiContext *imGuiContext = nullptr;
+	
 	bool hasFrameBegun = false;
 	
 	std::chrono::steady_clock::time_point prevFrameStart = std::chrono::steady_clock::now();
@@ -71,5 +82,8 @@ private:
 	bool useInput = true;
 	
 	GodotImGuiMesh *mesh = nullptr;
+	
+	std::unordered_map<std::string, ImFont *> fontsCache;
+	std::vector<FontSizePair> fontsToLoad;
 };
 #endif

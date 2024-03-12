@@ -38,10 +38,7 @@ public:
 	~GodotImGuiMesh();
 	static void _bind_methods();
 	
-	void _ready() override;
-	void _process(double_t delta) override;
 	void _enter_tree() override;
-	void _exit_tree() override;
 	
 	void ImGui_Impl_RenderDrawData(ImDrawData *drawData);
 	
