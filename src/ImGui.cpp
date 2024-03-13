@@ -77,8 +77,7 @@ void GodotImGui::_exit_tree()
 	if (imGuiContext) {
 		auto rs = RenderingServer::get_singleton();
 		rs->disconnect("frame_pre_draw", Callable(this, "ImGui_EndFrame"));
-		
-		ImGui_Impl_EndFrame();
+	
 		ImGui_Impl_Shutdown();
 		ImGui::DestroyContext();
 		imGuiContext = nullptr;
@@ -240,7 +239,8 @@ void GodotImGui::ImGui_Impl_Shutdown()
     ImGuiIO& io = ImGui::GetIO();
 	io.BackendPlatformUserData = nullptr;
 	fontsCache.clear();
-	// TODO: destroy godot imgui here
+	ImGui::DestroyContext();
+	imGuiContext = nullptr;
 }
 
 
