@@ -79,8 +79,6 @@ void GodotImGui::_exit_tree()
 		rs->disconnect("frame_pre_draw", Callable(this, "ImGui_EndFrame"));
 	
 		ImGui_Impl_Shutdown();
-		ImGui::DestroyContext();
-		imGuiContext = nullptr;
 	}
 }
 
@@ -257,7 +255,6 @@ ImFont *GodotImGui::LoadFont(const struct FontSizePair &info)
 	ImFontGlyphRangesBuilder glyphs;
 	glyphs.AddText("ęóąśłżźćńĘÓĄŚŁŻŹĆŃ„”µðđŋħˀĸþ→€←ŧ¶ſ@Ω§®Ŧ¥¢ıÓÞĄŚÐªŊĦ ̛&ŁŻŹĆ‘“Ńº•· ̣´^¨~`×÷ ̇˝ˇ˚¯˘¬¹²³¼½¾{[]}¸˛¿°±™⅞⅝⅜$£⅛¡");
 	glyphs.AddRanges(f->GetGlyphRangesDefault());
-    glyphs.AddRanges(f->GetGlyphRangesDefault());
     glyphs.AddRanges(f->GetGlyphRangesGreek());
     glyphs.AddRanges(f->GetGlyphRangesKorean());
     glyphs.AddRanges(f->GetGlyphRangesJapanese());
@@ -270,7 +267,9 @@ ImFont *GodotImGui::LoadFont(const struct FontSizePair &info)
 	ImVector<ImWchar> r;
 	glyphs.BuildRanges(&r);
 	
-	ImFont *font = io.Fonts->AddFontFromMemoryTTF((void *)bytes.ptr(), bytes.size(), info.size, nullptr, r.begin());
+	void *ownedByImGui = ImGui::MemAlloc(bytes.size());
+	memcpy(ownedByImGui, bytes.ptr(), bytes.size());
+	ImFont *font = io.Fonts->AddFontFromMemoryTTF(ownedByImGui, bytes.size(), info.size, nullptr, r.begin());
 	if (font) {
 		rebuildFonts = true;
 		ImGuiIO& io = ImGui::GetIO();
