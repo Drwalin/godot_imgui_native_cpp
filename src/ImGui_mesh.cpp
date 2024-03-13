@@ -38,6 +38,10 @@ void GodotImGui::ImGui_Impl_RenderDrawData(ImDrawData *draw_data)
 {
 	ClearChildren();
 	
+	if (imGuiContext == nullptr) {
+		return;
+	}
+	
 	// Avoid rendering when minimized
 	if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
 		return;

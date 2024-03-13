@@ -55,4 +55,12 @@ func _process(delta):
 		print("checkbox: ", checkbox.y);
 	ImGui.End();
 	
+	font = $"../GodotImGui".GetFont("res://dvu_sans_mono.ttf", 20.0);
+	ImGui.Begin("fps", ImGui.WindowFlags_AlwaysAutoResize);
+	ImGui.PushFont(font);
+	ImGui.Text("fps: %s" % Engine.get_frames_per_second());
+	ImGui.PopFont();
+	ImGui.End();
+	
+	
 	pass

@@ -74,6 +74,10 @@ void GodotImGui::ImGui_Impl_ProcessEvent(InputEvent *event)
 		return;
 	}
 	
+	if (imGuiContext == nullptr) {
+		return;
+	}
+	
     ImGuiIO& io = ImGui::GetIO();
 	
 	if (Object::cast_to<InputEventFromWindow>(event)) {

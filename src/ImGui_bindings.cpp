@@ -432,7 +432,7 @@ void GodotImGui::Bind_ImGui()
 #define ___NAME_TO_STR(__NAM) #__NAM
 
 #define BIND_ENUM_CONSTANT_FIELD(ENUM, VAL) \
-	ClassDB::bind_integer_constant("ImGui", #ENUM, ___NAME_TO_STR(ENUM##_&&VAL), ImGui##ENUM##_##VAL, true)
+	ClassDB::bind_integer_constant("ImGui", #ENUM, ___NAME_TO_STR(ENUM##_##VAL), ImGui##ENUM##_##VAL, true)
 
 void GodotImGui::Bind_EnumConstants()
 {
