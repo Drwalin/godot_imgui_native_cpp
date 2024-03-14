@@ -29,34 +29,6 @@ void GodotImGui::_process(double_t dt)
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-	
-	ImGui::PushFont(LoadFont("res://dvu_sans_mono.ttf", 16));
-	
-	ImGui_Impl_BeginFrame();
-	ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, {0, 72.0/255.0, 174.0/255.0, 1});
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
-	
-	
-	ImGui::Begin("Test");
-	
-	static float v[4];
-	float v2[4];
-	memcpy(v2, v, 16);
-	ImGui::InputFloat4("floats", v2);
-	memcpy(v, v2, 16);
-	
-	char str[100000] = "fdhjkfjdkslfjdkl;safj;dsfk;ds\ndkhjfldjskfljdksafjdklfjklasdff\nhdjfklhdjklafhdjlfjksa\ndjkfshdjklafhdslahdas\ndjksfsdfhdjskaflsdhjaklfdashf\nfdjkslafhjdkaslfhjksdlafsda\nfdjsafkjdhasfjkldhsaljfhdasf\ndjksafjdasko fdasjfhasf\ndjksapo fhasdjk fhjdjksf ajksp fhas\nfdjkps oafhjdspa fhdjkasf h\n hdfjsakfphdasjpofhdas f\nhfdjas klfhdjskal fhsd";
-	
-// 	ImGui::InputText("label1", str, sizeof(str));
-	
-	ImGui::InputTextMultiline("lab", str, sizeof(str), {0,0},
-			ImGuiInputTextFlags_AllowTabInput);
-	
-	
-//     InputTextMultiline(const char* label, char* buf, size_t buf_size, const ImVec2& size = ImVec2(0, 0), ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
-	ImGui::PopStyleColor(2);
-	ImGui::End();
-	ImGui::PopFont();
 }
 
 void GodotImGui::_input(const Ref<InputEvent> &event)
