@@ -289,7 +289,7 @@ ImFont *GodotImGui::LoadFont(const String &path, float sizePixels)
 	}
 	
 	std::string fontName = path.utf8().ptr();
-	fontName += ":" + std::to_string((int)(sizePixels*100.0f));
+	fontName += ":" + std::to_string((int)(sizePixels*100.0f+0.5f));
 	
 	auto it = fontsCache.find(fontName);
 	if (it != fontsCache.end()) {

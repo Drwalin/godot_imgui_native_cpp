@@ -400,8 +400,93 @@ void GodotImGui::Bind_ImGui()
 	
 	
 	// TODO: Input with keyboard
-    IMGUI_API bool          InputText(const char* label, char* buf, size_t buf_size, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
-    IMGUI_API bool          InputTextMultiline(const char* label, char* buf, size_t buf_size, const ImVec2& size = ImVec2(0, 0), ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
+	BIND_STATIC_METHOD(D_METHOD("InputText", "label", "currentTextUtf8String", "maxTextSize", "inputTextFlags"),
+		+[](const String &label, const PackedByteArray &currentText, int64_t maxTextSize, int64_t inputTextFlags) {
+			PackedByteArray ret = currentText;
+			ret.resize(maxTextSize);
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputText(label.utf8().ptr(), (char *)ret.ptrw(), ret.size(), inputTextFlags, nullptr, nullptr);
+			ar[1] = ret;
+			return ar;
+		});
+	BIND_STATIC_METHOD(D_METHOD("InputTextMultiline", "label", "currentTextUtf8String", "maxTextSize", "size", "inputTextFlags"),
+		+[](const String &label, const PackedByteArray &currentText, int64_t maxTextSize, const Vector2 &size, int64_t inputTextFlags) {
+			PackedByteArray ret = currentText;
+			ret.resize(maxTextSize);
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputTextMultiline(label.utf8().ptr(), (char *)ret.ptrw(), ret.size(), {size.x, size.y}, inputTextFlags, nullptr, nullptr);
+			ar[1] = ret;
+			return ar;
+		});
+	BIND_STATIC_METHOD(D_METHOD("InputFloat", "label", "value", "step", "stepFast", "inputTextFlags"),
+		+[](const String &label, float value, float step, float fastStep, int64_t inputTextFlags) {
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputFloat(label.utf8().ptr(), &value, step, fastStep, "%.3", inputTextFlags);
+			ar[1] = value;
+			return ar;
+		});
+	BIND_STATIC_METHOD(D_METHOD("InputFloat2", "label", "value", "inputTextFlags"),
+		+[](const String &label, const Vector2 &value, int64_t inputTextFlags) {
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputFloat2(label.utf8().ptr(), (float*)&value.x, "%.3", inputTextFlags);
+			ar[1] = value;
+			return ar;
+		});
+	BIND_STATIC_METHOD(D_METHOD("InputFloat3", "label", "value", "inputTextFlags"),
+		+[](const String &label, const Vector3 &value, int64_t inputTextFlags) {
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputFloat3(label.utf8().ptr(), (float*)&value.x, "%.3", inputTextFlags);
+			ar[1] = value;
+			return ar;
+		});
+	BIND_STATIC_METHOD(D_METHOD("InputFloat4", "label", "value", "inputTextFlags"),
+		+[](const String &label, const Vector4 &value, int64_t inputTextFlags) {
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputFloat4(label.utf8().ptr(), (float*)&value.x, "%.3", inputTextFlags);
+			ar[1] = value;
+			return ar;
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("InputInt", "label", "value", "step", "stepFast", "inputTextFlags"),
+		+[](const String &label, int64_t value, float step, float fastStep, int64_t inputTextFlags) {
+			int args[1] = {(int)value};
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputInt(label.utf8().ptr(), args, step, fastStep, inputTextFlags);
+			ar[1] = args[0];
+			return ar;
+		});
+	
+	BIND_STATIC_METHOD(D_METHOD("InputInt2", "label", "value", "inputTextFlags"),
+		+[](const String &label, const Vector2i &value, int64_t inputTextFlags) {
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputInt2(label.utf8().ptr(), (int*)&value.x, inputTextFlags);
+			ar[1] = value;
+			return ar;
+		});
+	BIND_STATIC_METHOD(D_METHOD("InputInt3", "label", "value", "inputTextFlags"),
+		+[](const String &label, const Vector3i &value, int64_t inputTextFlags) {
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputInt3(label.utf8().ptr(), (int*)&value.x, inputTextFlags);
+			ar[1] = value;
+			return ar;
+		});
+	BIND_STATIC_METHOD(D_METHOD("InputInt4", "label", "value", "inputTextFlags"),
+		+[](const String &label, const Vector4i &value, int64_t inputTextFlags) {
+			Array ar;
+			ar.resize(2);
+			ar[0] = ImGui::InputInt4(label.utf8().ptr(), (int*)&value.x, inputTextFlags);
+			ar[1] = value;
+			return ar;
+		});
 	
 	
 	
